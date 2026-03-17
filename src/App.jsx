@@ -7,12 +7,14 @@ import Login from './pages/Login';
 
 import Home from './pages/Home';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-// Layout and Pages 
+
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AddProduct from './pages/AddProduct';
 import ProductList from './pages/ProductList';
 import NewBatch from './pages/NewBatch';
+import History from './pages/History';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
               <Route path="/add-product" element={<AddProduct />} />
               <Route path="/product-list" element={<ProductList />} />
               <Route path="/new-batch" element={<NewBatch />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>

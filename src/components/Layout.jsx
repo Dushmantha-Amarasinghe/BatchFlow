@@ -1,180 +1,118 @@
-import React from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut } from 'lucide-react';
 
 export default function Layout() {
-    const { logout } = useAuth();
+    const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
-    const [showSupportModal, setShowSupportModal] = React.useState(false);
+    const location = useLocation();
 
-    async function handleLogout() {
-        try {
-            await logout();
-            navigate('/login');
-        } catch (err) {
-            console.error("Failed to logout", err);
-        }
+    const navItems = [
+        { path: '/dashboard',    icon: 'grid_view',         label: 'Dashboard' },
+        { path: '/add-product',  icon: 'add_circle',        label: 'Add Product' },
+        { path: '/new-batch',    icon: 'generating_tokens',  label: 'New Batch' },
+        { path: '/product-list', icon: 'inventory_2',       label: 'Products' },
+        { path: '/history',      icon: 'history',           label: 'History' },
+        { path: '/settings',     icon: 'settings',          label: 'Settings' },
+    ];
+
+    function isActive(path) {
+        return location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path));
     }
 
-    const toggleTheme = () => {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('batchflow_theme', isDark ? 'dark' : 'light');
-
-        const themeBtn = document.getElementById('themeToggleBtn');
-        if (themeBtn) {
-            themeBtn.innerHTML = isDark
-                ? '<span class="material-symbols-outlined">light_mode</span>'
-                : '<span class="material-symbols-outlined">dark_mode</span>';
-        }
-    };
-
-    React.useEffect(() => {
-        if (localStorage.getItem('batchflow_theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            const themeBtn = document.getElementById('themeToggleBtn');
-            if (themeBtn) {
-                themeBtn.innerHTML = '<span class="material-symbols-outlined">light_mode</span>';
-            }
-        }
-    }, []);
-
     return (
-        <>
-            <header>
-                <div className="container nav-container" style={{ height: '70px' }}>
-                    <NavLink to="/dashboard" className="logo">
+        <div className="app-layout">
+            {/* ── Header ── */}
+            <header className="app-header">
+                <div className="nav-container">
+                    <div className="logo" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
                         <span className="material-symbols-outlined logo-icon">widgets</span>
-                        <span>BatchFlow</span>
-                    </NavLink>
-
-                    <div className="nav-tabs">
-                        <NavLink to="/dashboard" className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`} end>
-                            <span className="material-symbols-outlined">dashboard</span>
-                            Dashboard
-                        </NavLink>
-                        <NavLink to="/add-product" className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}>
-                            <span className="material-symbols-outlined">add_circle</span>
-                            Add Product
-                        </NavLink>
-                        <NavLink to="/product-list" className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}>
-                            <span className="material-symbols-outlined">inventory_2</span>
-                            Product List
-                        </NavLink>
-                        <NavLink to="/new-batch" className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}>
-                            <span className="material-symbols-outlined">view_list</span>
-                            New Batch List
-                        </NavLink>
+                        BatchFlow
                     </div>
 
-                    <div className="header-actions">
-                        <button className="theme-toggle" id="themeToggleBtn" onClick={toggleTheme} title="Toggle Theme">
-                            <span className="material-symbols-outlined">dark_mode</span>
-                        </button>
-                        <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '8px 16px', marginLeft: '10px' }} title="Logout">
-                            <LogOut size={18} />
-                            <span style={{ marginLeft: '4px' }}>Logout</span>
+                    {/* Desktop pill tabs */}
+                    <nav className="nav-tabs">
+                        {navItems.map(item => (
+                            <button
+                                key={item.path}
+                                className={`tab-btn${isActive(item.path) ? ' active' : ''}`}
+                                onClick={() => navigate(item.path)}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '1.05rem' }}>{item.icon}</span>
+                                {item.label}
+                            </button>
+                        ))}
+                    </nav>
+
+                    {/* User avatar + Sign out */}
+                    <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {currentUser?.photoURL && (
+                            <img
+                                src={currentUser.photoURL}
+                                alt="avatar"
+                                style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid rgba(124,58,237,0.3)' }}
+                                referrerPolicy="no-referrer"
+                            />
+                        )}
+                        <button className="btn btn-ghost btn-sm" onClick={logout}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>logout</span>
+                            Sign Out
                         </button>
                     </div>
                 </div>
             </header>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="mobile-nav">
-                <div className="mobile-nav-inner">
-                    <NavLink to="/dashboard" className={({ isActive }) => `mobile-nav-btn ${isActive ? 'active' : ''}`} end>
-                        <span className="material-symbols-outlined">dashboard</span>
-                        <span className="nav-label">Dashboard</span>
-                    </NavLink>
-                    <NavLink to="/add-product" className={({ isActive }) => `mobile-nav-btn ${isActive ? 'active' : ''}`}>
-                        <span className="material-symbols-outlined">add_circle</span>
-                        <span className="nav-label">Add</span>
-                    </NavLink>
-                    <NavLink to="/product-list" className={({ isActive }) => `mobile-nav-btn ${isActive ? 'active' : ''}`}>
-                        <span className="material-symbols-outlined">inventory_2</span>
-                        <span className="nav-label">Products</span>
-                    </NavLink>
-                    <NavLink to="/new-batch" className={({ isActive }) => `mobile-nav-btn ${isActive ? 'active' : ''}`}>
-                        <span className="material-symbols-outlined">view_list</span>
-                        <span className="nav-label">Batch</span>
-                    </NavLink>
+            {/* ── Main Content ── */}
+            <main className="app-main">
+                <div className="container" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+                    <Outlet />
                 </div>
-            </nav>
-
-            <main className="container" style={{ paddingTop: '40px' }}>
-                <Outlet />
             </main>
 
-            <footer style={{ marginTop: '40px' }}>
+            {/* ── Footer ── */}
+            <footer className="app-footer" style={{
+                borderTop: '1px solid var(--border-subtle)',
+                background: 'rgba(5,5,5,0.6)',
+                backdropFilter: 'blur(8px)',
+                padding: '20px 0',
+            }}>
                 <div className="container">
-                    <div className="footer-content">
-                        <p style={{ marginBottom: '10px' }}>
-                            © 2025 BatchFlow. A product by <strong>Refora Technologies</strong>.
-                            Made with <span className="footer-heart">❤</span> for efficient batch management.
-                        </p>
-                        <p>
-                            <a href="#" onClick={(e) => { e.preventDefault(); setShowSupportModal(true); }} style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>
-                                🤝 Support the Developer
+                    <div style={{ textAlign: 'center' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            © {new Date().getFullYear()} BatchFlow · A product by{' '}
+                            <a href="https://reforatech.com" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa', fontWeight: 600 }}>
+                                Refora Technologies
                             </a>
-                            <span style={{ color: 'var(--text-secondary)', marginLeft: '8px', fontSize: '0.85rem' }}>
-                                Help us keep bringing updates!
-                            </span>
+                            {' '}· Made with{' '}
+                            <span style={{ color: '#ef4444', animation: 'heartbeat 2s ease infinite', display: 'inline-flex', alignItems: 'center' }}>❤</span>
                         </p>
+                        <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: '#fbbf24', fontSize: '0.9rem' }}>💛</span>
+                            <span style={{ color: '#a78bfa', fontWeight: 700, fontSize: '0.75rem' }}>Support the Developer</span>
+                        </div>
+                        <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                            <Link to="/privacy-policy" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Privacy Policy</Link>
+                            <a href="https://reforatech.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>reforatech.com</a>
+                        </div>
                     </div>
                 </div>
             </footer>
 
-            {/* Support Developer Modal */}
-            {showSupportModal && (
-                <div className="modal active">
-                    <div className="modal-content" style={{ maxWidth: '500px' }}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">🤝 Support the Developer</h2>
-                            <button className="modal-close" onClick={() => setShowSupportModal(false)}>
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-                        </div>
-
-                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                                Thank you for considering supporting BatchFlow! Our country currently doesn't support direct integration with platforms like PayPal or Stripe, so we are accepting direct bank transfers.
-                            </p>
-                        </div>
-
-                        <div style={{ backgroundColor: 'var(--light-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-                                    <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Bank Name</span>
-                                    <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>People's Bank</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-                                    <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Branch</span>
-                                    <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>Delgoda</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-                                    <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Account Name</span>
-                                    <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>DSB Amarasinghe</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-                                    <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Account Type</span>
-                                    <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>Saving Account</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--primary-light)', padding: '15px', borderRadius: '8px', marginTop: '5px' }}>
-                                    <span style={{ color: 'var(--primary)', fontWeight: '600' }}>Account Number</span>
-                                    <span style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary)', letterSpacing: '1px' }}>118200280035460</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25px' }}>
-                            <button className="btn btn-primary" onClick={() => setShowSupportModal(false)} style={{ width: '100%' }}>
-                                Close
-                            </button>
-                        </div>
-                    </div>
+            {/* ── Mobile Bottom Nav (hidden on desktop) ── */}
+            <nav className="mobile-nav">
+                <div className="mobile-nav-inner">
+                    {navItems.map(item => (
+                        <button
+                            key={item.path}
+                            className={`mobile-nav-btn${isActive(item.path) ? ' active' : ''}`}
+                            onClick={() => navigate(item.path)}
+                        >
+                            <span className="material-symbols-outlined">{item.icon}</span>
+                            <span className="nav-label">{item.label}</span>
+                        </button>
+                    ))}
                 </div>
-            )}
-        </>
+            </nav>
+        </div>
     );
 }

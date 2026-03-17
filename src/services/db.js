@@ -7,7 +7,8 @@ const getUserId = () => {
     return user.uid;
 };
 
-// Categories
+// ── Categories ───────────────────────────────────────────────────────────────
+
 export async function loadCategories() {
     try {
         const q = query(collection(db, "categories"), where("userId", "==", getUserId()));
@@ -44,14 +45,13 @@ export async function deleteCategory(categoryId) {
     }
 }
 
-// Products
+// ── Products ─────────────────────────────────────────────────────────────────
+
 export async function loadProducts() {
     try {
         const q = query(collection(db, "products"), where("userId", "==", getUserId()));
         const snapshot = await getDocs(q);
         const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Sort by lastUpdated desc in memory
         return results.sort((a, b) => {
             const timeA = a.lastUpdated?.toMillis?.() || 0;
             const timeB = b.lastUpdated?.toMillis?.() || 0;
@@ -69,11 +69,7 @@ export async function saveProduct(product) {
             const productRef = doc(db, "products", product.id);
             const updateData = { ...product };
             delete updateData.id;
-
-            await updateDoc(productRef, {
-                ...updateData,
-                lastUpdated: serverTimestamp(),
-            });
+            await updateDoc(productRef, { ...updateData, lastUpdated: serverTimestamp() });
             return product;
         } else {
             const docRef = await addDoc(collection(db, "products"), {
@@ -100,23 +96,39 @@ export async function deleteProduct(productId) {
     }
 }
 
-// Batch History
+// ── Batch History ─────────────────────────────────────────────────────────────
+
 export async function loadBatchHistory() {
     try {
         const q = query(collection(db, "batchHistory"), where("userId", "==", getUserId()));
         const snapshot = await getDocs(q);
         const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Sort by date desc in memory
         results.sort((a, b) => {
             const timeA = a.date?.toMillis?.() || 0;
             const timeB = b.date?.toMillis?.() || 0;
             return timeB - timeA;
         });
-
         return results.slice(0, 10);
     } catch (error) {
         console.error("Error loading batch history:", error);
+        return [];
+    }
+}
+
+/** Load full batch history (no 10-item cap) — used by History page */
+export async function loadAllBatchHistory() {
+    try {
+        const q = query(collection(db, "batchHistory"), where("userId", "==", getUserId()));
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        results.sort((a, b) => {
+            const timeA = a.date?.toMillis?.() || 0;
+            const timeB = b.date?.toMillis?.() || 0;
+            return timeB - timeA;
+        });
+        return results;
+    } catch (error) {
+        console.error("Error loading all batch history:", error);
         return [];
     }
 }
@@ -139,28 +151,19 @@ export async function loadProductBatches(productId) {
     try {
         const q = query(collection(db, "batchHistory"), where("userId", "==", getUserId()));
         const snapshot = await getDocs(q);
-
         const productBatches = [];
-        snapshot.forEach((d) => {
+        snapshot.forEach(d => {
             const data = d.data();
             if (data.batches) {
-                const batch = data.batches.find((b) => b.productId === productId);
-                if (batch) {
-                    productBatches.push({
-                        id: d.id,
-                        date: data.date,
-                        ...batch,
-                    });
-                }
+                const batch = data.batches.find(b => b.productId === productId);
+                if (batch) productBatches.push({ id: d.id, date: data.date, ...batch });
             }
         });
-
         productBatches.sort((a, b) => {
             const timeA = a.date?.toMillis?.() || 0;
             const timeB = b.date?.toMillis?.() || 0;
             return timeB - timeA;
         });
-
         return productBatches;
     } catch (error) {
         console.error("Error loading product batches:", error);
@@ -168,14 +171,13 @@ export async function loadProductBatches(productId) {
     }
 }
 
-// PDF Settings
+// ── PDF Settings ──────────────────────────────────────────────────────────────
+
 export async function loadPdfSettings() {
     try {
         const docRef = doc(db, "settings", getUserId());
         const d = await getDoc(docRef);
-        if (d.exists()) {
-            return d.data();
-        }
+        if (d.exists()) return d.data();
         return null;
     } catch (error) {
         console.error("Error loading PDF settings:", error);
@@ -185,10 +187,34 @@ export async function loadPdfSettings() {
 
 export async function savePdfSettings(settings) {
     try {
-        await setDoc(doc(db, "settings", getUserId()), settings);
+        await setDoc(doc(db, "settings", getUserId()), settings, { merge: true });
         return true;
     } catch (error) {
         console.error("Error saving PDF settings:", error);
+        throw error;
+    }
+}
+
+// ── Webhook Settings ──────────────────────────────────────────────────────────
+
+export async function loadWebhookSettings() {
+    try {
+        const docRef = doc(db, "webhooks", getUserId());
+        const d = await getDoc(docRef);
+        if (d.exists()) return d.data();
+        return null;
+    } catch (error) {
+        console.error("Error loading webhook settings:", error);
+        return null;
+    }
+}
+
+export async function saveWebhookSettings(settings) {
+    try {
+        await setDoc(doc(db, "webhooks", getUserId()), settings);
+        return true;
+    } catch (error) {
+        console.error("Error saving webhook settings:", error);
         throw error;
     }
 }
