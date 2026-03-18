@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 import Login from './pages/Login';
 
 import Home from './pages/Home';
@@ -19,6 +20,7 @@ import Settings from './pages/Settings';
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <NotificationProvider>
         <AuthProvider>
           <Routes>

@@ -11,6 +11,7 @@ export default function NewBatch() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [materials, setMaterials] = useState('');
+    const [generatedMaterials, setGeneratedMaterials] = useState('');
     const { showNotification } = useNotification();
 
     const [showSelectModal, setShowSelectModal] = useState(false);
@@ -110,6 +111,8 @@ export default function NewBatch() {
             setBarcodeDataUrls(bars);
             setCurrentBatchData(newBatchList);
             setBatchTitle('New Batch List');
+            setGeneratedMaterials(materials.trim() || '');
+            setMaterials('');
             setShowSelectModal(false);
             setSelectedIds([]);
             showNotification(`${newBatchList.length} new batch${newBatchList.length !== 1 ? 'es' : ''} generated!`, 'success');
@@ -131,6 +134,7 @@ export default function NewBatch() {
         setBarcodeDataUrls(bars);
         setCurrentBatchData(currentBatchList);
         setBatchTitle('Current Batch List');
+        setGeneratedMaterials('');
     }
 
     async function handlePdfSettingsSubmit(e) {
@@ -215,6 +219,15 @@ export default function NewBatch() {
             {/* Batch Results */}
             {currentBatchData && (
                 <div>
+                    {generatedMaterials && (
+                        <div className="info-box info" style={{ marginBottom: '20px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '1rem', flexShrink: 0 }}>biotech</span>
+                            <div>
+                                <div style={{ fontWeight: 600, marginBottom: '4px', fontSize: '0.8rem' }}>Micro-Traceability Note Added</div>
+                                <div style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{generatedMaterials}</div>
+                            </div>
+                        </div>
+                    )}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                         <h2 className="section-title" style={{ marginBottom: 0 }}>{batchTitle}</h2>
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{currentBatchData.length} product{currentBatchData.length !== 1 ? 's' : ''}</span>

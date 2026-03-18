@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { loadProducts, loadCategories, deleteProduct, saveProduct, loadProductBatches } from '../services/db';
 import { formatDate } from '../utils/formatters';
 import { useNotification } from '../contexts/NotificationContext';
+import CustomSelect from '../components/CustomSelect';
 
 export default function ProductList() {
     const [products, setProducts] = useState([]);
@@ -60,6 +61,13 @@ export default function ProductList() {
         return matchSearch && (filterCategory ? p.categoryId === filterCategory : true);
     });
 
+    const filterCategoryOptions = [
+        { value: '', label: 'All Categories' },
+        ...categories.map(c => ({ value: c.id, label: c.name }))
+    ];
+
+    const editCategoryOptions = categories.map(c => ({ value: c.id, label: c.name }));
+
     return (
         <div className="tab-content active" id="product-list">
             <div className="page-header">
@@ -83,15 +91,13 @@ export default function ProductList() {
                         </button>
                     )}
                 </div>
-                <select
-                    className="form-control"
-                    style={{ width: 'auto', minWidth: '160px' }}
-                    value={filterCategory}
-                    onChange={e => setFilterCategory(e.target.value)}
-                >
-                    <option value="">All Categories</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+                <div style={{ width: '220px' }}>
+                    <CustomSelect
+                        options={filterCategoryOptions}
+                        value={filterCategory}
+                        onChange={setFilterCategory}
+                    />
+                </div>
                 {(searchTerm || filterCategory) && (
                     <button className="btn btn-ghost btn-sm" onClick={() => { setSearchTerm(''); setFilterCategory(''); }}>
                         Clear filters
@@ -232,10 +238,12 @@ export default function ProductList() {
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Category</label>
-                                <select className="form-control" required value={editingProduct.categoryId} onChange={e => setEditingProduct({ ...editingProduct, categoryId: e.target.value })}>
-                                    <option value="">Select category…</option>
-                                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                                </select>
+                                <CustomSelect
+                                    options={editCategoryOptions}
+                                    value={editingProduct.categoryId}
+                                    onChange={val => setEditingProduct({ ...editingProduct, categoryId: val })}
+                                    placeholder="Select category…"
+                                />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Current Batch Number</label>

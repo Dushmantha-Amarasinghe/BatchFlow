@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadCategories, saveCategory, deleteCategory, saveProduct, loadProducts } from '../services/db';
 import { useNotification } from '../contexts/NotificationContext';
+import CustomSelect from '../components/CustomSelect';
 
 export default function AddProduct() {
     const [categories, setCategories] = useState([]);
@@ -135,18 +136,13 @@ export default function AddProduct() {
 
                     <div className="form-group">
                         <label className="form-label" htmlFor="productCategory">Category</label>
-                        <select
-                            className="form-control"
+                        <CustomSelect
                             id="productCategory"
+                            options={categories.map(c => ({ value: c.id, label: c.name }))}
                             value={categoryId}
-                            onChange={e => setCategoryId(e.target.value)}
-                            required
-                        >
-                            <option value="">Select a category…</option>
-                            {categories.map(c => (
-                                <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                        </select>
+                            onChange={setCategoryId}
+                            placeholder="Select a category…"
+                        />
                         {categories.length === 0 && (
                             <div className="form-hint" style={{ color: 'var(--warning)' }}>Add a category above first.</div>
                         )}

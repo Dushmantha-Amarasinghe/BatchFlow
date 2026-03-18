@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import SupportModal from './SupportModal';
 
 export default function Layout() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [isSupportOpen, setIsSupportOpen] = useState(false);
 
     const navItems = [
         { path: '/dashboard',    icon: 'grid_view',         label: 'Dashboard' },
@@ -88,7 +90,7 @@ export default function Layout() {
                         </p>
                         <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
                             <span style={{ color: '#fbbf24', fontSize: '0.9rem' }}>💛</span>
-                            <span style={{ color: '#a78bfa', fontWeight: 700, fontSize: '0.75rem' }}>Support the Developer</span>
+                            <button onClick={() => setIsSupportOpen(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#a78bfa', fontWeight: 700, fontSize: '0.75rem', fontFamily: 'inherit' }}>Support the Developer</button>
                         </div>
                         <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
                             <Link to="/privacy-policy" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Privacy Policy</Link>
@@ -113,6 +115,9 @@ export default function Layout() {
                     ))}
                 </div>
             </nav>
+
+            {/* Support Modal */}
+            <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
         </div>
     );
 }

@@ -72,7 +72,11 @@ export default function CustomSelect({ options = [], value, onChange, placeholde
             aria-controls={`${selectId}-list`}
             id={selectId}
             onKeyDown={handleKeyDown}
-            onClick={() => !disabled && setOpen(o => !o)}
+            onClick={(e) => {
+                if (disabled) return;
+                if (listRef.current && listRef.current.contains(e.target)) return;
+                setOpen(o => !o);
+            }}
         >
             <div className="custom-select-trigger">
                 <span className={`custom-select-value${!selected ? ' placeholder' : ''}`}>

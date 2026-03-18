@@ -117,6 +117,13 @@ export default function Settings() {
                         Google Auth <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>check</span>
                     </div>
                 </div>
+                {/* Sign Out Button (visible primarily on mobile) */}
+                <div className="hide-on-desktop" style={{ marginTop: '16px' }}>
+                    <button className="btn btn-danger" onClick={logout} style={{ width: '100%', justifyContent: 'center' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>logout</span>
+                        Sign Out
+                    </button>
+                </div>
             </div>
 
             {/* Data Export */}

@@ -109,7 +109,7 @@ export default function Dashboard() {
             {/* Quick Actions */}
             <div className="card" style={{ marginBottom: '28px', background: 'transparent', border: 'none', padding: 0 }}>
                 <h2 className="section-title">Quick Actions</h2>
-                <div className="quick-actions" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                <div className="quick-actions">
                     {quickActions.map(a => (
                         <div key={a.path} className="action-card" onClick={() => navigate(a.path)} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', height: '100%' }}>
                             <div className={`action-icon ${a.iconClass}`}>
@@ -145,7 +145,7 @@ export default function Dashboard() {
                         <button className="btn btn-primary btn-sm" style={{ marginTop: '16px' }} onClick={() => navigate('/new-batch')}>Generate Now</button>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div className="recent-batches-list">
                         {recentBatches.map(batch => (
                             <div key={batch.id} className="batch-card" onClick={() => handleBatchClick(batch)} style={{ padding: '20px' }}>
                                 <div className="batch-header" style={{ marginBottom: '12px' }}>

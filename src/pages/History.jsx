@@ -102,7 +102,7 @@ export default function History() {
                 <div className="history-filters" style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
                     {['all', 'new', 'current'].map(f => (
                         <button key={f} className={`history-filter-chip${typeFilter === f ? ' active' : ''}`} onClick={() => setTypeFilter(f)}>
-                            {f === 'all' ? '📋 All' : f === 'new' ? '🆕 New Batches' : '📍 Current Lists'}
+                            {f === 'all' ? 'All' : f === 'new' ? 'New Batches' : 'Current Lists'}
                         </button>
                     ))}
                 </div>
