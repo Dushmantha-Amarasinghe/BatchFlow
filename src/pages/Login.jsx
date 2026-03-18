@@ -1,26 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-    const { loginWithGoogle } = useAuth();
+    const { loginWithGoogle, currentUser } = useAuth();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    // If user is already logged in, redirect to dashboard
+    useEffect(() => {
+        if (currentUser) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [currentUser, navigate]);
 
     async function handleGoogleLogin() {
         try {
             setError('');
             setLoading(true);
+            // signInWithRedirect navigates away — result is handled by
+            // onAuthStateChanged in AuthContext after returning from Google
             await loginWithGoogle();
-            navigate('/dashboard');
         } catch (err) {
             setError('Failed to sign in with Google. Please try again.');
             console.error(err);
-        } finally {
             setLoading(false);
         }
     }
+
 
     return (
         <div className="auth-container">

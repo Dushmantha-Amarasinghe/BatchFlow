@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext();
 
@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     function loginWithGoogle() {
-        return signInWithPopup(auth, googleProvider);
+        return signInWithRedirect(auth, googleProvider);
     }
 
     function logout() {
@@ -21,6 +21,11 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
+        // Handle redirect result after returning from Google sign-in
+        getRedirectResult(auth).catch(() => {
+            // Silently ignore redirect result errors (e.g. no pending redirect)
+        });
+
         const unsubscribe = onAuthStateChanged(auth, user => {
             setCurrentUser(user);
             setLoading(false);
