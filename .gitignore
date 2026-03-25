@@ -30,6 +30,7 @@ lerna-debug.log*
 # Environment files (local configs)
 .env
 /.env.*
+!.env.example
 
 # React/Vite
 node_modules
